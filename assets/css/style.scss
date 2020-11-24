@@ -1,0 +1,23 @@
+// .modal  {
+//     z-index: 99;
+//     position: fixed;
+//     top: 0;
+//     left: 0;
+//     // transform: translate(-50%, -50%);
+// }
+
+.modal {
+    transition: opacity 0.25s ease;
+  }
+
+.favourited {
+    span {
+        content: "Favourited";
+    }
+    &:hover span {
+       display: none;
+    }
+    &:hover:after {
+        content: "Unfavourite";
+    }
+}

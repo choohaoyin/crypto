@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptocurrency Market - Dashboard</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="module" src="assets/js/script.js"></script>
+</head>
+
+<body class="bg-gray-200">
+    <h1 class="text-3xl mb-2 p-4">Cryptocurrency Market - Dashboard</h1>
+    <div class="container mx-auto w-full bg-white p-2 z-0" id="dashboard">
+        <div class="tab">
+            <ul class="flex border-b">
+                <li class="mr-1" :class="!favourited_tab && '-mb-px'">
+                    <button class="bg-white inline-block py-2 px-4 font-semibold" @click="favourited_tab = false"
+                        :class="!favourited_tab ? 'text-black border-l border-t border-r rounded-t' : 'text-blue-500 hover:text-blue-800'">All</button>
+                </li>
+                <li class="mr-1" :class="favourited_tab && '-mb-px'">
+                    <button class="bg-white inline-block py-2 px-4 font-semibold" @click="favourited_tab = true"
+                        :class="favourited_tab ? 'text-black border-l border-t border-r rounded-t' : 'text-blue-500 hover:text-blue-800'">Favourited</button>
+                </li>
+            </ul>
+        </div>
+        <div class="float-right currency my-3">
+            <label for="currency">Currency</label>
+            <select class="bg-gray-200 rounded p-1 w-40" v-model="currency" @change="selectCurrency">
+                <option disabled value="">Please select one</option>
+                <option :value="key" :selected="key == currency" v-for="rate,key in exchange_rate">{{rate.unit}}
+                    {{rate.name}}</option>
+            </select>
+        </div>
+        <div class="w-full overflow-scroll container">
+            <table class="table-fixed mx-auto">
+                <thead>
+                    <tr>
+                        <th class="md:px-4 py-2">Name</th>
+                        <th class="md:px-4 py-2">Symbol</th>
+                        <th class="md:px-4 py-2">Price</th>
+                        <th class="md:px-4 py-2">Volume</th>
+                        <th class="md:px-4 py-2">Graph</th>
+                        <th class="md:px-4 py-2">Favourite</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(coin,index) in filtered" :id="index" :key="index"
+                        class="hover:bg-gray-200 cursor-pointer">
+                        <td class="border px-4 py-2" @click="openModal">{{coin.name}}</td>
+                        <td class="border px-4 py-2" @click="openModal">{{coin.symbol}}</td>
+                        <td class="border px-4 py-2" @click="openModal">
+                            {{currency_symbol}}{{formatNumber(coin.current_price)}}
+                        </td>
+                        <td class="border px-4 py-2" @click="openModal">
+                            {{currency_symbol}}{{formatNumber(coin.total_volume,0)}}
+                        </td>
+                        <td class="border px-4 py-2" @click="openModal">
+                            <svg id="sparkline"  :viewBox="'0 0 '+sparkline.width+' '+sparkline.height" :width="sparkline.width" :height="sparkline.height"
+                                v-if="coin.sparkline != null && coin.sparkline != 'N/A'">
+                                <polyline fill="none" stroke="#0074d9" stroke-width="1.25" :points="coin.sparkline" />
+                            </svg>
+                            <span class="text-center mx-auto" v-if="coin.sparkline == null">Graph is loading</span>
+                            <span class="text-center mx-auto" v-if="coin.sparkline == 'N/A'">Graph not available</span>
+                        </td>
+                        <td class="border px-4 py-2 w-40 text-center">
+                            <button
+                                class="mx-auto bg-green-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mx-auto favourited"
+                                v-if="coin.favourite" @click="addToFavourite"><span>Favourited</span></button>
+                            <button
+                                class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-auto"
+                                v-if="!coin.favourite" @click="addToFavourite">Favourite</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h2 class="text-center" v-if="filtered <= 0">No coin favourited.</h2>
+        </div>
+    </div>
+    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center">
+        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+
+            <div
+                class="modal-close absolute top-0 right-0 cursor-pointer flex flex-col items-center mt-4 mr-4 text-white text-sm z-50">
+            </div>
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p class="text-2xl font-bold" id="modal-coin-name">Coin Name</p>
+                    <div class="modal-close cursor-pointer z-50">
+                        <svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                            viewBox="0 0 18 18">
+                            <path
+                                d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+                <canvas id="graph" class="w-full"></canvas>
+                <table class="table-fixed w-full mx-auto">
+                    <tbody class="divide-y divide-gray-200">
+                        <tr class="px-4 py-2">
+                            <th>Current Price</th>
+                            <td id="price">0</td>
+                        </tr>
+                        <tr class="px-4 py-2">
+                            <th>Trading Volume</th>
+                            <td id="volume">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="flex justify-end pt-2">
+                    <button
+                        class="modal-close px-4 bg-indigo-500 p-2 rounded-lg text-white hover:bg-indigo-400">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

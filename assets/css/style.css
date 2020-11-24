@@ -1,0 +1,17 @@
+.modal {
+  -webkit-transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease;
+}
+
+.favourited span {
+  content: "Favourited";
+}
+
+.favourited:hover span {
+  display: none;
+}
+
+.favourited:hover:after {
+  content: "Unfavourite";
+}
+/*# sourceMappingURL=style.css.map */
