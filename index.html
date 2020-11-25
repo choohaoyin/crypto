@@ -51,7 +51,7 @@
                 <tbody>
                     <tr v-for="(coin,index) in filtered" :id="index" :key="index"
                         class="hover:bg-gray-200 cursor-pointer">
-                        <td class="border px-4 py-2" @click="openModal">{{coin.name}}</td>
+                        <td class="border px-4 py-2 text-center" @click="openModal"><img :src="coin.image" alt="" class="mx-auto w-10 m-1">{{coin.name}}</td>
                         <td class="border px-4 py-2" @click="openModal">{{coin.symbol}}</td>
                         <td class="border px-4 py-2" @click="openModal">
                             {{currency_symbol}}{{formatNumber(coin.current_price)}}
