@@ -8,15 +8,27 @@
 
 .modal {
     transition: opacity 0.25s ease;
-  }
+}
+
+.tab {
+    ul > li > button:focus {
+        outline: 0;
+    }
+}
 
 .favourited {
+    &:focus {
+        outline: 0;
+    }
+
     span {
         content: "Favourited";
     }
+
     &:hover span {
-       display: none;
+        display: none;
     }
+
     &:hover:after {
         content: "Unfavourite";
     }
